@@ -57,7 +57,7 @@ Use the `Write` tool (this is not a `.cs` file, so `create_script` doesn't apply
     "precompiledReferences": [
         "nunit.framework.dll"
     ],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
@@ -65,6 +65,8 @@ Use the `Write` tool (this is not a `.cs` file, so `create_script` doesn't apply
     "noEngineReferences": false
 }
 ```
+
+`"autoReferenced"` must be `false` here. If it's `true`, Unity's predefined `Assembly-CSharp` automatically references this test assembly (predefined assemblies auto-reference every `autoReferenced: true` asmdef), which creates a cycle with this asmdef's own explicit `"Assembly-CSharp"` reference — Unity silently drops the `Assembly-CSharp` reference to break the cycle, and `using Sudoku.Core;` fails with `CS0246` even though `Sudoku.Core` compiles cleanly. This is also why Unity's own "Tests Assembly Folder" template defaults to `autoReferenced: false`.
 
 - [ ] **Step 2: Write the failing test**
 
