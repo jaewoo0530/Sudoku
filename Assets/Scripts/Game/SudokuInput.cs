@@ -16,7 +16,7 @@ namespace Sudoku.Game
         private void Update()
         {
             var keyboard = Keyboard.current;
-            if (keyboard == null || !controller.HasSelection) return;
+            if (keyboard == null || controller == null || !controller.HasSelection) return;
 
             for (int i = 0; i < DigitKeys.Length; i++)
             {

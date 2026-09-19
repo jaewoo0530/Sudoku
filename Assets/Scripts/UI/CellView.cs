@@ -43,7 +43,7 @@ namespace Sudoku.UI
             {
                 _valueText.text = cell.Value.ToString();
                 _valueText.gameObject.SetActive(true);
-                foreach (var t in _markTexts) t.gameObject.SetActive(false);
+                foreach (var t in _markTexts) t.text = string.Empty;
             }
             else
             {
@@ -51,9 +51,7 @@ namespace Sudoku.UI
                 for (int digit = 1; digit <= 9; digit++)
                 {
                     var t = _markTexts[digit - 1];
-                    bool marked = cell.HasMark(digit);
-                    t.gameObject.SetActive(marked);
-                    if (marked) t.text = digit.ToString();
+                    t.text = cell.HasMark(digit) ? digit.ToString() : string.Empty;
                 }
             }
         }

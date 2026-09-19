@@ -69,8 +69,14 @@ namespace Sudoku.UI
 
         public void ShowPickerFor(CellView cell)
         {
-            _picker.transform.SetParent(cell.transform, false);
-            _picker.ShowAt(Vector2.zero);
+            var canvasRect = (RectTransform)transform;
+            var cellRect = (RectTransform)cell.transform;
+            Vector3 worldCenter = cellRect.TransformPoint(cellRect.rect.center);
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(null, worldCenter);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, null, out Vector2 localPoint);
+            _picker.transform.SetParent(canvasRect, false);
+            _picker.ShowAt(localPoint);
+            _picker.transform.SetAsLastSibling();
         }
 
         public void HidePicker()
@@ -100,6 +106,7 @@ namespace Sudoku.UI
                     var boxRect = CreateUIObject($"Box_{boxRow}_{boxCol}", boardRoot);
                     var boxImage = boxRect.gameObject.AddComponent<Image>();
                     boxImage.color = new Color(0.6f, 0.6f, 0.6f);
+                    boxImage.raycastTarget = false;
 
                     float cellSize = (boxSize - cellSpacing * 4f) / 3f;
                     var innerGrid = boxRect.gameObject.AddComponent<GridLayoutGroup>();
@@ -146,7 +153,7 @@ namespace Sudoku.UI
                 var markCellRect = CreateUIObject($"Mark_{i + 1}", marksRect);
                 var markText = markCellRect.gameObject.AddComponent<Text>();
                 ConfigureText(markText, Mathf.RoundToInt(markCellSize * 0.6f));
-                markText.gameObject.SetActive(false);
+                markText.text = string.Empty;
                 markTexts[i] = markText;
             }
 
