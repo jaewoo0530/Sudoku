@@ -1508,6 +1508,8 @@ git commit -m "Add runtime-built UGUI board, picker, and New Game button views"
 
 From the response, record the GameObject's instance ID (`GAME_ROOT_ID`) and the `SudokuGameController` component's instance ID (`CONTROLLER_ID`) — read `mcpforunity://scene/gameobject/{GAME_ROOT_ID}/components` if the create response doesn't already include component IDs.
 
+`mcp__UnityMCP__manage_components` (`action: "set_property"`, `target: GAME_ROOT_ID`, `component_type: "Sudoku.Game.SudokuInput"`, `property: "controller"`, `value: CONTROLLER_ID`). `SudokuInput.Update()` dereferences `controller.HasSelection` every frame — leaving this field unwired throws a `NullReferenceException` on the first frame of Play mode.
+
 - [ ] **Step 2: Create the `EventSystem`**
 
 `mcp__UnityMCP__manage_gameobject` (`action: "create"`, `name: "EventSystem"`, `components_to_add: ["UnityEngine.EventSystems.EventSystem", "UnityEngine.InputSystem.UI.InputSystemUIInputModule"]`, or the short names `["EventSystem", "InputSystemUIInputModule"]` if the qualified names don't resolve).
