@@ -19,12 +19,15 @@
 - A cell's value and pencil marks are mutually exclusive: setting a value always clears marks; toggling a mark on a filled (non-given) cell clears the value first, then starts notes mode with that mark. This lives in `SudokuBoard`, not the controller.
 - Given cells must be fully inert: not selectable, not clickable at all (`Image.raycastTarget = false`), never mutable.
 - Visual style is functional/minimal only (flat colors, no custom art assets) — do not spend time on polish beyond what's specified per task.
+- Any assembly whose code needs to be reachable from an EditMode test gets its own `.asmdef` (`Sudoku.Core.asmdef`, `Sudoku.Game.asmdef`) referenced by name from `Sudoku.Tests.EditMode.asmdef`. **Never add `"Assembly-CSharp"` to a custom asmdef's `"references"` array** — confirmed empirically in this project (Unity 6000.3.8f1) that a plain-name reference to the predefined `Assembly-CSharp` does not resolve from a custom asmdef (the type remains unresolvable, `CS0246`, even though `Assembly-CSharp` itself compiles with zero errors), regardless of `autoReferenced`. Referencing another **custom asmdef** by its `"name"` (e.g. `"Sudoku.Core"`) works reliably. The UI layer (Task 5) has no EditMode tests, so it can stay unassembled in the implicit `Assembly-CSharp` — that assembly automatically references every `autoReferenced: true` custom asmdef in the project, so UI code sees `Sudoku.Core`/`Sudoku.Game` types with no extra configuration.
+- A custom asmdef does not automatically get Unity package assemblies the way `Assembly-CSharp` does — list them explicitly in `"references"` (e.g. `Sudoku.Game.asmdef` needs `"Unity.InputSystem"` because `SudokuInput` uses `Keyboard`/`Key`).
 
 ---
 
 ### Task 1: Core data model — `Cell` + `SudokuBoard`, with the EditMode test assembly
 
 **Files:**
+- Create: `Assets/Scripts/Core/Sudoku.Core.asmdef`
 - Create: `Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef`
 - Create: `Assets/Scripts/Core/Cell.cs`
 - Create: `Assets/Scripts/Core/SudokuBoard.cs`
@@ -33,11 +36,35 @@
 **Interfaces:**
 - Produces: `Sudoku.Core.Cell` — struct with `int Value` (0 = empty), `bool IsGiven`, `int PencilMask`, `bool HasMark(int digit)`, `void SetMark(int digit, bool on)`, `void ToggleMark(int digit)`.
 - Produces: `Sudoku.Core.SudokuBoard` — class with `const int Size = 9`, `const int BoxSize = 3`, `Cell GetCell(int row, int col)`, `int GetValue(int row, int col)`, `bool IsGiven(int row, int col)`, `void LoadGivens(int[,] givens)`, `void SetValue(int row, int col, int digit)`, `void ToggleMark(int row, int col, int digit)`.
+- Produces: a custom assembly named `Sudoku.Core` (via `Sudoku.Core.asmdef`) containing everything under `Assets/Scripts/Core/` — later tasks' asmdefs reference it by the name `"Sudoku.Core"`.
 - Consumes: nothing (first task).
 
-- [ ] **Step 1: Create the EditMode test assembly definition**
+- [ ] **Step 1: Create the `Sudoku.Core` assembly definition**
 
-Use the `Write` tool (this is not a `.cs` file, so `create_script` doesn't apply) to create `Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef`:
+Use the `Write` tool (these are not `.cs` files, so `create_script` doesn't apply) to create `Assets/Scripts/Core/Sudoku.Core.asmdef`:
+
+```json
+{
+    "name": "Sudoku.Core",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+```
+
+This assembly has no Unity dependency and no special references — `autoReferenced: true` (the default) is what makes it automatically visible to `Assembly-CSharp` and later to `Sudoku.Game`, with no reference wiring needed on their side.
+
+- [ ] **Step 2: Create the EditMode test assembly definition**
+
+Create `Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef`:
 
 ```json
 {
@@ -46,7 +73,7 @@ Use the `Write` tool (this is not a `.cs` file, so `create_script` doesn't apply
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Assembly-CSharp"
+        "Sudoku.Core"
     ],
     "includePlatforms": [
         "Editor"
@@ -66,9 +93,9 @@ Use the `Write` tool (this is not a `.cs` file, so `create_script` doesn't apply
 }
 ```
 
-`"autoReferenced"` must be `false` here. If it's `true`, Unity's predefined `Assembly-CSharp` automatically references this test assembly (predefined assemblies auto-reference every `autoReferenced: true` asmdef), which creates a cycle with this asmdef's own explicit `"Assembly-CSharp"` reference — Unity silently drops the `Assembly-CSharp` reference to break the cycle, and `using Sudoku.Core;` fails with `CS0246` even though `Sudoku.Core` compiles cleanly. This is also why Unity's own "Tests Assembly Folder" template defaults to `autoReferenced: false`.
+Reference `"Sudoku.Core"` by name — this is a real custom asmdef, unlike `"Assembly-CSharp"` (see Global Constraints: referencing the predefined assembly by name does not resolve in this project). `"autoReferenced": false` is still correct practice for a test assembly (avoids it being pulled into other assemblies' auto-references), matching Unity's own "Tests Assembly Folder" template default.
 
-- [ ] **Step 2: Write the failing test**
+- [ ] **Step 3: Write the failing test**
 
 Use `mcp__UnityMCP__create_script` with `path: "Assets/Tests/EditMode/SudokuBoardTests.cs"`:
 
@@ -135,13 +162,14 @@ public class SudokuBoardTests
 }
 ```
 
-- [ ] **Step 3: Refresh Unity and run the test to verify it fails**
+- [ ] **Step 4: Refresh Unity and run the test to verify it fails**
 
 Run `mcp__UnityMCP__refresh_unity` with `compile: "request"`, `wait_for_ready: true`. Then run `mcp__UnityMCP__run_tests` with `mode: "EditMode"`, `assembly_names: ["Sudoku.Tests.EditMode"]`, poll with `mcp__UnityMCP__get_test_job` until done.
 
 Expected: compile error (`Sudoku.Core` namespace / `SudokuBoard` type not found) — this is the "red" state since the types don't exist yet.
 
-- [ ] **Step 4: Implement `Cell`**
+- [ ] **Step 5: Implement `Cell`**
+
 
 `mcp__UnityMCP__create_script`, `path: "Assets/Scripts/Core/Cell.cs"`:
 
@@ -170,7 +198,7 @@ namespace Sudoku.Core
 }
 ```
 
-- [ ] **Step 5: Implement `SudokuBoard`**
+- [ ] **Step 6: Implement `SudokuBoard`**
 
 `mcp__UnityMCP__create_script`, `path: "Assets/Scripts/Core/SudokuBoard.cs"`:
 
@@ -231,16 +259,17 @@ namespace Sudoku.Core
 }
 ```
 
-- [ ] **Step 6: Refresh Unity and run the test to verify it passes**
+- [ ] **Step 7: Refresh Unity and run the test to verify it passes**
 
 `mcp__UnityMCP__refresh_unity` (`compile: "request"`, `wait_for_ready: true`), then `mcp__UnityMCP__run_tests` (`mode: "EditMode"`, `assembly_names: ["Sudoku.Tests.EditMode"]`), poll via `get_test_job`.
 
 Expected: all 4 tests in `SudokuBoardTests` PASS.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef.meta \
+git add Assets/Scripts/Core/Sudoku.Core.asmdef Assets/Scripts/Core/Sudoku.Core.asmdef.meta \
+        Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef.meta \
         Assets/Tests/EditMode/SudokuBoardTests.cs Assets/Tests/EditMode/SudokuBoardTests.cs.meta \
         Assets/Scripts/Core/Cell.cs Assets/Scripts/Core/Cell.cs.meta \
         Assets/Scripts/Core/SudokuBoard.cs Assets/Scripts/Core/SudokuBoard.cs.meta
@@ -674,6 +703,8 @@ git commit -m "Add SudokuGenerator with unique-solution digging and tests"
 ### Task 4: Game layer — `SudokuGameController` + `SudokuInput`
 
 **Files:**
+- Create: `Assets/Scripts/Game/Sudoku.Game.asmdef`
+- Modify: `Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef` (add `"Sudoku.Game"` to `references`)
 - Create: `Assets/Scripts/Game/SudokuGameController.cs`
 - Create: `Assets/Scripts/Game/SudokuInput.cs`
 - Test: `Assets/Tests/EditMode/SudokuGameControllerTests.cs`
@@ -681,8 +712,46 @@ git commit -m "Add SudokuGenerator with unique-solution digging and tests"
 **Interfaces:**
 - Consumes: `Sudoku.Core.SudokuBoard`, `Sudoku.Core.SudokuGenerator.Generate` (Tasks 1, 3).
 - Produces: `Sudoku.Game.SudokuGameController` — MonoBehaviour with `SudokuBoard Board { get; }`, `int SelectedRow { get; }`, `int SelectedCol { get; }`, `bool HasSelection { get; }`, `event Action OnBoardReset`, `event Action OnSelectionChanged`, `event Action<int,int> OnCellChanged`, `void NewGame()`, `void SelectCell(int row, int col)`, `void ClearSelection()`, `void SetValue(int digit)`, `void TogglePencilMark(int digit)`. `Sudoku.Game.SudokuInput` — MonoBehaviour with `[SerializeField] SudokuGameController controller`.
+- Produces: a custom assembly named `Sudoku.Game` (via `Sudoku.Game.asmdef`) containing everything under `Assets/Scripts/Game/`.
 
-- [ ] **Step 1: Write the failing tests**
+- [ ] **Step 1: Create the `Sudoku.Game` assembly definition and add it to the test assembly's references**
+
+Create `Assets/Scripts/Game/Sudoku.Game.asmdef`:
+
+```json
+{
+    "name": "Sudoku.Game",
+    "rootNamespace": "",
+    "references": [
+        "Sudoku.Core",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
+```
+
+`"Unity.InputSystem"` is required because `SudokuInput` uses `Keyboard`/`Key` — unlike `Assembly-CSharp`, a custom asmdef does not automatically get package assemblies. `"autoReferenced": true` (the default) is what makes `Sudoku.Game` visible to `Assembly-CSharp` (and therefore to Task 5's UI code) with no reference wiring on that side.
+
+Then edit `Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef` (created in Task 1) so its `"references"` array is:
+
+```json
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Sudoku.Core",
+        "Sudoku.Game"
+    ],
+```
+
+- [ ] **Step 2: Write the failing tests**
 
 `mcp__UnityMCP__create_script`, `path: "Assets/Tests/EditMode/SudokuGameControllerTests.cs"`:
 
@@ -798,11 +867,11 @@ public class SudokuGameControllerTests
 }
 ```
 
-- [ ] **Step 2: Refresh and run to verify failure**
+- [ ] **Step 3: Refresh and run to verify failure**
 
 `refresh_unity` (`compile: "request"`), `run_tests`. Expected: compile error, `SudokuGameController` not found.
 
-- [ ] **Step 3: Implement `SudokuGameController`**
+- [ ] **Step 4: Implement `SudokuGameController`**
 
 `mcp__UnityMCP__create_script`, `path: "Assets/Scripts/Game/SudokuGameController.cs"`:
 
@@ -880,7 +949,7 @@ namespace Sudoku.Game
 }
 ```
 
-- [ ] **Step 4: Implement `SudokuInput`**
+- [ ] **Step 5: Implement `SudokuInput`**
 
 `mcp__UnityMCP__create_script`, `path: "Assets/Scripts/Game/SudokuInput.cs"`:
 
@@ -920,14 +989,16 @@ namespace Sudoku.Game
 
 `SudokuInput` only ever reads the 9 listed keys, so any other keyboard input (letters, symbols, arrow keys, etc.) never reaches `SetValue` — this is how "ignore non 1-9 input" (requirement 2) is satisfied, with no separate validation branch needed.
 
-- [ ] **Step 5: Refresh and run to verify pass**
+- [ ] **Step 6: Refresh and run to verify pass**
 
 Expect all 6 `SudokuGameControllerTests` to PASS. (`SudokuInput` has no automated test here — it's a thin `Keyboard.current` poll verified manually in Task 7's Play Mode check, since simulating Input System device events under EditMode NUnit requires `InputTestFixture` machinery that's out of scope for this foundation.)
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add Assets/Scripts/Game/SudokuGameController.cs Assets/Scripts/Game/SudokuGameController.cs.meta \
+git add Assets/Scripts/Game/Sudoku.Game.asmdef Assets/Scripts/Game/Sudoku.Game.asmdef.meta \
+        Assets/Tests/EditMode/Sudoku.Tests.EditMode.asmdef \
+        Assets/Scripts/Game/SudokuGameController.cs Assets/Scripts/Game/SudokuGameController.cs.meta \
         Assets/Scripts/Game/SudokuInput.cs Assets/Scripts/Game/SudokuInput.cs.meta \
         Assets/Tests/EditMode/SudokuGameControllerTests.cs Assets/Tests/EditMode/SudokuGameControllerTests.cs.meta
 git commit -m "Add SudokuGameController and keyboard input with tests"
