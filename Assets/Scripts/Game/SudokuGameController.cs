@@ -7,20 +7,8 @@ namespace Sudoku.Game
     public class SudokuGameController : MonoBehaviour
     {
         [SerializeField] private int targetGivens = 32;
-        private SudokuBoard _board;
 
-        public SudokuBoard Board
-        {
-            get
-            {
-                if (_board == null)
-                {
-                    NewGame();
-                }
-                return _board;
-            }
-            private set { _board = value; }
-        }
+        public SudokuBoard Board { get; private set; }
         public int SelectedRow { get; private set; } = -1;
         public int SelectedCol { get; private set; } = -1;
         public bool HasSelection => SelectedRow >= 0;

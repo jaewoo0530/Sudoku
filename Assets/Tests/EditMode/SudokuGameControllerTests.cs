@@ -11,6 +11,7 @@ public class SudokuGameControllerTests
     {
         var go = new GameObject("Controller");
         _controller = go.AddComponent<SudokuGameController>();
+        _controller.NewGame();
     }
 
     [TearDown]
