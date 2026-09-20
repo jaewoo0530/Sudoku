@@ -7,10 +7,12 @@ namespace Sudoku.UI
     public class NumberPickerView : MonoBehaviour
     {
         private SudokuGameController _controller;
+        private PickerButton[] _buttons;
 
         public void Initialize(SudokuGameController controller, PickerButton[] buttons)
         {
             _controller = controller;
+            _buttons = buttons;
             for (int i = 0; i < buttons.Length; i++)
             {
                 int digit = i + 1;
@@ -34,6 +36,7 @@ namespace Sudoku.UI
 
         public void ShowAt(Vector2 anchoredPosition)
         {
+            foreach (var button in _buttons) button.ResetVisual();
             var rect = (RectTransform)transform;
             rect.anchoredPosition = anchoredPosition;
             gameObject.SetActive(true);

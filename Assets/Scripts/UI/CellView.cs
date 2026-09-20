@@ -58,11 +58,20 @@ namespace Sudoku.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (eventData.button != PointerEventData.InputButton.Left) return;
             if (_controller.Board.IsGiven(Row, Col)) return;
 
-            _controller.SelectCell(Row, Col);
-            _boardView.ShowPickerFor(this);
+            if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                _controller.SelectCell(Row, Col);
+                _boardView.ShowPickerFor(this);
+            }
+            else if (eventData.button == PointerEventData.InputButton.Right)
+            {
+                if (_controller.Board.GetValue(Row, Col) != 0)
+                {
+                    _controller.ClearValue(Row, Col);
+                }
+            }
         }
     }
 }
