@@ -1,4 +1,4 @@
-using Sudoku.Game;
+﻿using Sudoku.Game;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -176,7 +176,8 @@ namespace Sudoku.UI
         private void BuildPicker()
         {
             var pickerRect = CreateUIObject("NumberPicker", transform);
-            pickerRect.sizeDelta = new Vector2(180, 180);
+            float cellSize = (((boardSize - boxSpacing * 4f) / 3f) - cellSpacing * 4f) / 3f;
+            pickerRect.sizeDelta = new Vector2(cellSize, cellSize);
             pickerRect.anchorMin = pickerRect.anchorMax = new Vector2(0.5f, 0.5f);
             pickerRect.pivot = new Vector2(0.5f, 0.5f);
 
@@ -184,9 +185,10 @@ namespace Sudoku.UI
             pickerBackground.color = new Color(0.15f, 0.15f, 0.15f, 0.95f);
 
             var grid = pickerRect.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(56, 56);
-            grid.spacing = new Vector2(4, 4);
-            grid.padding = new RectOffset(4, 4, 4, 4);
+            grid.cellSize = new Vector2(20, 20);
+            grid.spacing = new Vector2(3, 3);
+            grid.padding = new RectOffset(3, 3, 3, 3);
+            grid.childAlignment = TextAnchor.MiddleCenter;
 
             var buttons = new PickerButton[9];
             for (int i = 0; i < 9; i++)
@@ -198,7 +200,7 @@ namespace Sudoku.UI
                 var textRect = CreateUIObject("Label", buttonRect);
                 StretchFull(textRect);
                 var text = textRect.gameObject.AddComponent<Text>();
-                ConfigureText(text, 24);
+                ConfigureText(text, 15);
                 text.text = (i + 1).ToString();
 
                 buttons[i] = buttonRect.gameObject.AddComponent<PickerButton>();

@@ -725,8 +725,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sudoku.UI.BoardView
   controller: {fileID: 1298122642}
-  boardSize: 540
-  boxSpacing: 6
+  boardSize: 700
+  boxSpacing: 1
   cellSpacing: 1
 --- !u!114 &1927173193
 MonoBehaviour:
