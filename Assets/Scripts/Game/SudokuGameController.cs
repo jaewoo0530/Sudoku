@@ -67,5 +67,13 @@ namespace Sudoku.Game
             Board.ToggleMark(SelectedRow, SelectedCol, digit);
             OnCellChanged?.Invoke(SelectedRow, SelectedCol);
         }
+
+        public void ClearValue(int row, int col)
+        {
+            if (Board.IsGiven(row, col)) return;
+
+            Board.ClearValue(row, col);
+            OnCellChanged?.Invoke(row, col);
+        }
     }
 }

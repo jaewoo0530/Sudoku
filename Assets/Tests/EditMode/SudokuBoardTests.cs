@@ -57,4 +57,28 @@ public class SudokuBoardTests
 
         Assert.IsFalse(board.GetCell(0, 0).HasMark(6));
     }
+
+    [Test]
+    public void ClearValue_OnFilledCell_SetsValueToZero()
+    {
+        var board = new SudokuBoard();
+        board.LoadGivens(new int[9, 9]);
+        board.SetValue(3, 3, 8);
+
+        board.ClearValue(3, 3);
+
+        Assert.AreEqual(0, board.GetValue(3, 3));
+    }
+
+    [Test]
+    public void ClearValue_AlsoClearsAnyPencilMask()
+    {
+        var board = new SudokuBoard();
+        board.LoadGivens(new int[9, 9]);
+        board.SetValue(1, 1, 4);
+
+        board.ClearValue(1, 1);
+
+        Assert.IsFalse(board.GetCell(1, 1).HasMark(4));
+    }
 }

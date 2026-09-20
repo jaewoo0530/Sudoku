@@ -79,6 +79,29 @@ public class SudokuGameControllerTests
     }
 
     [Test]
+    public void ClearValue_OnFilledNonGivenCell_ClearsIt()
+    {
+        int row = FindEmptyRow(out int col);
+        _controller.SelectCell(row, col);
+        _controller.SetValue(6);
+
+        _controller.ClearValue(row, col);
+
+        Assert.AreEqual(0, _controller.Board.GetValue(row, col));
+    }
+
+    [Test]
+    public void ClearValue_OnGivenCell_DoesNothing()
+    {
+        FindGivenCell(out int row, out int col);
+        int originalValue = _controller.Board.GetValue(row, col);
+
+        _controller.ClearValue(row, col);
+
+        Assert.AreEqual(originalValue, _controller.Board.GetValue(row, col));
+    }
+
+    [Test]
     public void NewGame_ReplacesBoardAndClearsSelection()
     {
         int row = FindEmptyRow(out int col);

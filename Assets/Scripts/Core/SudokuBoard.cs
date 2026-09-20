@@ -50,5 +50,13 @@ namespace Sudoku.Core
             cell.ToggleMark(digit);
             _cells[row, col] = cell;
         }
+
+        public void ClearValue(int row, int col)
+        {
+            Cell cell = _cells[row, col];
+            cell.Value = 0;
+            cell.PencilMask = 0;
+            _cells[row, col] = cell;
+        }
     }
 }
