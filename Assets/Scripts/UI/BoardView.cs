@@ -185,7 +185,7 @@ namespace Sudoku.UI
             pickerBackground.color = new Color(0.15f, 0.15f, 0.15f, 0.95f);
 
             var grid = pickerRect.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(20, 20);
+            grid.cellSize = new Vector2(18, 18);
             grid.spacing = new Vector2(3, 3);
             grid.padding = new RectOffset(3, 3, 3, 3);
             grid.childAlignment = TextAnchor.MiddleCenter;
