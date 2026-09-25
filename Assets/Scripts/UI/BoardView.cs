@@ -13,11 +13,13 @@ namespace Sudoku.UI
 
         private readonly CellView[,] _cells = new CellView[9, 9];
         private NumberPickerView _picker;
+        private ClearNoticeView _clearNotice;
 
         private void Awake()
         {
             BuildBoard();
             BuildPicker();
+            BuildClearNotice();
         }
 
         private void OnEnable()
@@ -25,6 +27,7 @@ namespace Sudoku.UI
             controller.OnBoardReset += HandleBoardReset;
             controller.OnSelectionChanged += HandleSelectionChanged;
             controller.OnCellChanged += HandleCellChanged;
+            controller.OnPuzzleSolved += HandlePuzzleSolved;
         }
 
         private void OnDisable()
@@ -32,6 +35,7 @@ namespace Sudoku.UI
             controller.OnBoardReset -= HandleBoardReset;
             controller.OnSelectionChanged -= HandleSelectionChanged;
             controller.OnCellChanged -= HandleCellChanged;
+            controller.OnPuzzleSolved -= HandlePuzzleSolved;
         }
 
         private void Start()
@@ -53,6 +57,11 @@ namespace Sudoku.UI
         private void HandleCellChanged(int row, int col)
         {
             RefreshAll();
+        }
+
+        private void HandlePuzzleSolved()
+        {
+            _clearNotice.Show();
         }
 
         private bool IsSelected(int row, int col)
@@ -220,6 +229,27 @@ namespace Sudoku.UI
 
             _picker = pickerRect.gameObject.AddComponent<NumberPickerView>();
             _picker.Initialize(controller, buttons);
+        }
+
+        private void BuildClearNotice()
+        {
+            var noticeRect = CreateUIObject("ClearNotice", transform);
+            noticeRect.sizeDelta = new Vector2(260, 80);
+            noticeRect.anchorMin = noticeRect.anchorMax = new Vector2(0.5f, 0.5f);
+            noticeRect.anchoredPosition = Vector2.zero;
+
+            var background = noticeRect.gameObject.AddComponent<Image>();
+            background.color = new Color(0.1f, 0.6f, 0.1f, 0.9f);
+            background.raycastTarget = false;
+
+            var textRect = CreateUIObject("Text", noticeRect);
+            StretchFull(textRect);
+            var text = textRect.gameObject.AddComponent<Text>();
+            ConfigureText(text, 32);
+            text.text = "Cleared!";
+
+            _clearNotice = noticeRect.gameObject.AddComponent<ClearNoticeView>();
+            noticeRect.gameObject.SetActive(false);
         }
 
         private static RectTransform CreateUIObject(string name, Transform parent)
