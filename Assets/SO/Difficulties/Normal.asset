@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Normal
   m_EditorClassIdentifier: Sudoku.Game::Sudoku.Game.DifficultySettings
   displayName: Normal
-  emptyCells: 49
+  emptyCells: 40

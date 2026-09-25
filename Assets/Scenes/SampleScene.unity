@@ -630,7 +630,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sudoku.UI.DifficultyButtonView
   controller: {fileID: 1298122642}
-  difficulty: 2
+  difficulty: {fileID: 11400000, guid: 8d2864e0921e64548a25aa42b8388837, type: 2}
 --- !u!114 &1072688363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1055,7 +1055,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sudoku.UI.DifficultyButtonView
   controller: {fileID: 1298122642}
-  difficulty: 1
+  difficulty: {fileID: 11400000, guid: 3c2d2c4fbe6ed6c4bbb6a144ec199d68, type: 2}
 --- !u!114 &1262749689
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1168,9 +1168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd914bf81c9faf34c809fca53d8c0915, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Sudoku.Game::Sudoku.Game.SudokuGameController
-  easyEmptyCells: 40
-  normalEmptyCells: 49
-  hardEmptyCells: 56
+  defaultDifficulty: {fileID: 11400000, guid: 3c2d2c4fbe6ed6c4bbb6a144ec199d68, type: 2}
 --- !u!114 &1298122643
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1331,7 +1329,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sudoku.UI.DifficultyButtonView
   controller: {fileID: 1298122642}
-  difficulty: 0
+  difficulty: {fileID: 11400000, guid: 23bdd80608ce6544bb9ce745e4bce646, type: 2}
 --- !u!114 &1505293388
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Easy
   m_EditorClassIdentifier: Sudoku.Game::Sudoku.Game.DifficultySettings
   displayName: Easy
-  emptyCells: 40
+  emptyCells: 30
