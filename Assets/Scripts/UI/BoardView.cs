@@ -88,6 +88,16 @@ namespace Sudoku.UI
         {
             var canvasTransform = GetComponentInParent<Canvas>().transform;
 
+            int boardInsertIndex = canvasTransform.childCount;
+            for (int i = 0; i < canvasTransform.childCount; i++)
+            {
+                if (canvasTransform.GetChild(i).GetComponent<Button>() != null)
+                {
+                    boardInsertIndex = i;
+                    break;
+                }
+            }
+
             var boardRoot = CreateUIObject("BoardRoot", canvasTransform);
             boardRoot.sizeDelta = new Vector2(boardSize, boardSize);
             boardRoot.anchorMin = boardRoot.anchorMax = new Vector2(0.5f, 0.5f);
@@ -128,16 +138,7 @@ namespace Sudoku.UI
 
             BuildBackgroundCatcher(canvasTransform);
 
-            // The catcher forces itself to sibling index 0 (always behind
-            // everything). Force the board to index 1, right after it, so
-            // the board always renders/raycasts BEHIND any UI controls that
-            // already exist as static children of the Canvas in the saved
-            // scene (e.g. the difficulty/undo buttons) - those would
-            // otherwise end up with a LOWER sibling index than a
-            // just-created BoardRoot (which normally appends at the end),
-            // letting the board's cells steal clicks meant for the buttons
-            // wherever they visually overlap.
-            boardRoot.SetSiblingIndex(1);
+            boardRoot.SetSiblingIndex(boardInsertIndex + 1);
         }
 
         private CellView BuildCell(Transform parent, int row, int col, float cellSizePx)
