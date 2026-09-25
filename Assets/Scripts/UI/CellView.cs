@@ -19,6 +19,7 @@ namespace Sudoku.UI
         private static readonly Color GivenColor = new Color(0.85f, 0.85f, 0.85f);
         private static readonly Color NormalColor = Color.white;
         private static readonly Color SelectedColor = new Color(0.75f, 0.88f, 1f);
+        private static readonly Color ConflictColor = new Color(1f, 0.7f, 0.7f);
 
         public void Initialize(SudokuGameController controller, BoardView boardView, int row, int col,
             Image background, Text valueText, Text[] markTexts)
@@ -35,9 +36,12 @@ namespace Sudoku.UI
         public void Refresh(bool isSelected)
         {
             var cell = _controller.Board.GetCell(Row, Col);
+            bool hasConflict = _controller.Board.HasConflictAt(Row, Col);
 
             _background.raycastTarget = !cell.IsGiven;
-            _background.color = cell.IsGiven ? GivenColor : (isSelected ? SelectedColor : NormalColor);
+            _background.color = hasConflict
+                ? ConflictColor
+                : (cell.IsGiven ? GivenColor : (isSelected ? SelectedColor : NormalColor));
 
             if (cell.Value != 0)
             {

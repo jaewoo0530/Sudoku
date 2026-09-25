@@ -52,7 +52,7 @@ namespace Sudoku.UI
 
         private void HandleCellChanged(int row, int col)
         {
-            _cells[row, col].Refresh(IsSelected(row, col));
+            RefreshAll();
         }
 
         private bool IsSelected(int row, int col)
