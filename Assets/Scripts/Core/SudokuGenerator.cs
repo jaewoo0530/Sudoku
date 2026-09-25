@@ -12,14 +12,39 @@ namespace Sudoku.Core
     {
         private const int Size = SudokuSolver.Size;
 
+        // Even with a multi-pass dig (see DigHoles below), some randomly
+        // generated full solutions have a genuine local minimum above the
+        // requested target - no further cell can be removed from THAT
+        // particular grid while keeping the solution unique, regardless of
+        // removal order. When that happens, retry with a fresh full
+        // solution grid rather than settling for more givens than asked.
+        private const int MaxSolutionAttempts = 50;
+
         public static GeneratedPuzzle Generate(int targetGivens, Random random = null)
         {
             random ??= new Random();
 
-            int[,] solution = GenerateFullSolution(random);
-            int[,] givens = DigHoles(solution, targetGivens, random);
+            int[,] solution;
+            int[,] givens;
+            int attempts = 0;
+            do
+            {
+                solution = GenerateFullSolution(random);
+                givens = DigHoles(solution, targetGivens, random);
+                attempts++;
+            }
+            while (CountGivens(givens) > targetGivens && attempts < MaxSolutionAttempts);
 
             return new GeneratedPuzzle { Givens = givens, Solution = solution };
+        }
+
+        private static int CountGivens(int[,] givens)
+        {
+            int count = 0;
+            for (int r = 0; r < Size; r++)
+                for (int c = 0; c < Size; c++)
+                    if (givens[r, c] != 0) count++;
+            return count;
         }
 
         private static int[,] GenerateFullSolution(Random random)
@@ -58,37 +83,49 @@ namespace Sudoku.Core
             return digits;
         }
 
+        // A single greedy pass over one random cell order can get stuck
+        // short of the target purely because of that order (removing a
+        // different remaining cell first might have allowed further
+        // removals). Repeat full passes over a freshly reshuffled order of
+        // the still-remaining givens until either the target is reached or
+        // a whole pass removes nothing further (a genuine local minimum).
         private static int[,] DigHoles(int[,] solution, int targetGivens, Random random)
         {
             var puzzle = (int[,])solution.Clone();
-            var cells = new (int row, int col)[Size * Size];
-            int index = 0;
-            for (int r = 0; r < Size; r++)
-                for (int c = 0; c < Size; c++)
-                    cells[index++] = (r, c);
-
-            for (int i = cells.Length - 1; i > 0; i--)
-            {
-                int j = random.Next(i + 1);
-                (cells[i], cells[j]) = (cells[j], cells[i]);
-            }
-
             int givensCount = Size * Size;
 
-            foreach (var (row, col) in cells)
+            bool progress = true;
+            while (givensCount > targetGivens && progress)
             {
-                if (givensCount <= targetGivens) break;
+                progress = false;
 
-                int backup = puzzle[row, col];
-                puzzle[row, col] = 0;
+                var remaining = new System.Collections.Generic.List<(int row, int col)>();
+                for (int r = 0; r < Size; r++)
+                    for (int c = 0; c < Size; c++)
+                        if (puzzle[r, c] != 0) remaining.Add((r, c));
 
-                if (SudokuSolver.CountSolutions(puzzle, 2) != 1)
+                for (int i = remaining.Count - 1; i > 0; i--)
                 {
-                    puzzle[row, col] = backup;
-                    continue;
+                    int j = random.Next(i + 1);
+                    (remaining[i], remaining[j]) = (remaining[j], remaining[i]);
                 }
 
-                givensCount--;
+                foreach (var (row, col) in remaining)
+                {
+                    if (givensCount <= targetGivens) break;
+
+                    int backup = puzzle[row, col];
+                    puzzle[row, col] = 0;
+
+                    if (SudokuSolver.CountSolutions(puzzle, 2) != 1)
+                    {
+                        puzzle[row, col] = backup;
+                        continue;
+                    }
+
+                    givensCount--;
+                    progress = true;
+                }
             }
 
             return puzzle;

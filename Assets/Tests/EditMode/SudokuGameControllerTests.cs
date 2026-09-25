@@ -6,12 +6,15 @@ public class SudokuGameControllerTests
 {
     private SudokuGameController _controller;
 
+    private DifficultySettings _normal;
+
     [SetUp]
     public void SetUp()
     {
         var go = new GameObject("Controller");
         _controller = go.AddComponent<SudokuGameController>();
-        _controller.NewGame(Difficulty.Normal);
+        _normal = MakeDifficulty(49);
+        _controller.NewGame(_normal);
     }
 
     [TearDown]
@@ -107,24 +110,28 @@ public class SudokuGameControllerTests
         int row = FindEmptyRow(out int col);
         _controller.SelectCell(row, col);
 
-        _controller.NewGame(Difficulty.Normal);
+        _controller.NewGame(_normal);
 
         Assert.IsFalse(_controller.HasSelection);
         Assert.IsNotNull(_controller.Board);
     }
 
     [Test]
-    public void NewGame_Easy_UsesEasyEmptyCellsCount()
+    public void NewGame_UsesTheGivenSettingsEmptyCellsCount()
     {
-        _controller.NewGame(Difficulty.Easy);
+        var easy = MakeDifficulty(40);
+
+        _controller.NewGame(easy);
 
         Assert.AreEqual(81 - 40, CountFilledCells());
     }
 
     [Test]
-    public void NewGame_Hard_UsesHardEmptyCellsCount()
+    public void NewGame_UsesTheGivenSettingsEmptyCellsCount_Hard()
     {
-        _controller.NewGame(Difficulty.Hard);
+        var hard = MakeDifficulty(56);
+
+        _controller.NewGame(hard);
 
         Assert.AreEqual(81 - 56, CountFilledCells());
     }
@@ -190,7 +197,7 @@ public class SudokuGameControllerTests
         _controller.SelectCell(row, col);
         _controller.SetValue(3);
 
-        _controller.NewGame(Difficulty.Normal);
+        _controller.NewGame(_normal);
 
         Assert.AreEqual(0, _controller.UndoStackCount);
     }
@@ -243,6 +250,13 @@ public class SudokuGameControllerTests
             for (int c = 0; c < 9; c++)
                 if (_controller.Board.GetValue(r, c) != 0) count++;
         return count;
+    }
+
+    private static DifficultySettings MakeDifficulty(int emptyCells)
+    {
+        var settings = ScriptableObject.CreateInstance<DifficultySettings>();
+        settings.emptyCells = emptyCells;
+        return settings;
     }
 
     private void FindGivenCell(out int row, out int col)

@@ -7,9 +7,7 @@ namespace Sudoku.Game
 {
     public class SudokuGameController : MonoBehaviour
     {
-        [SerializeField] private int easyEmptyCells = 40;
-        [SerializeField] private int normalEmptyCells = 49;
-        [SerializeField] private int hardEmptyCells = 56;
+        [SerializeField] private DifficultySettings defaultDifficulty;
 
         private readonly Stack<CellEditCommand> _undoStack = new Stack<CellEditCommand>();
 
@@ -26,17 +24,12 @@ namespace Sudoku.Game
 
         private void Awake()
         {
-            NewGame(Difficulty.Normal);
+            NewGame(defaultDifficulty);
         }
 
-        public void NewGame(Difficulty difficulty)
+        public void NewGame(DifficultySettings difficulty)
         {
-            int emptyCells;
-            if (difficulty == Difficulty.Easy) emptyCells = easyEmptyCells;
-            else if (difficulty == Difficulty.Hard) emptyCells = hardEmptyCells;
-            else emptyCells = normalEmptyCells;
-
-            int targetGivens = SudokuBoard.Size * SudokuBoard.Size - emptyCells;
+            int targetGivens = SudokuBoard.Size * SudokuBoard.Size - difficulty.emptyCells;
 
             var puzzle = SudokuGenerator.Generate(targetGivens);
             Board = new SudokuBoard();
