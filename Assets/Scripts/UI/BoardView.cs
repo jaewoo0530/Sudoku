@@ -28,6 +28,7 @@ namespace Sudoku.UI
             controller.OnSelectionChanged += HandleSelectionChanged;
             controller.OnCellChanged += HandleCellChanged;
             controller.OnPuzzleSolved += HandlePuzzleSolved;
+            controller.OnValueSet += HandleValueSet;
         }
 
         private void OnDisable()
@@ -36,6 +37,7 @@ namespace Sudoku.UI
             controller.OnSelectionChanged -= HandleSelectionChanged;
             controller.OnCellChanged -= HandleCellChanged;
             controller.OnPuzzleSolved -= HandlePuzzleSolved;
+            controller.OnValueSet -= HandleValueSet;
         }
 
         private void Start()
@@ -62,6 +64,11 @@ namespace Sudoku.UI
         private void HandlePuzzleSolved()
         {
             _clearNotice.Show();
+        }
+
+        private void HandleValueSet()
+        {
+            _picker.Hide();
         }
 
         private bool IsSelected(int row, int col)

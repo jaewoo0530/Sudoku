@@ -21,6 +21,7 @@ namespace Sudoku.Game
         public event Action OnSelectionChanged;
         public event Action<int, int> OnCellChanged;
         public event Action OnPuzzleSolved;
+        public event Action OnValueSet;
 
         private void Awake()
         {
@@ -66,6 +67,7 @@ namespace Sudoku.Game
             Board.SetValue(SelectedRow, SelectedCol, digit);
             PushIfChanged(SelectedRow, SelectedCol, before);
             OnCellChanged?.Invoke(SelectedRow, SelectedCol);
+            OnValueSet?.Invoke();
 
             if (Board.IsSolved())
             {

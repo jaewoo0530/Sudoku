@@ -1,4 +1,4 @@
-using Sudoku.Game;
+﻿using Sudoku.Game;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -26,7 +26,6 @@ namespace Sudoku.UI
             if (button == PointerEventData.InputButton.Left)
             {
                 _controller.SetValue(digit);
-                Hide();
             }
             else if (button == PointerEventData.InputButton.Right)
             {

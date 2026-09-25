@@ -203,6 +203,30 @@ public class SudokuGameControllerTests
     }
 
     [Test]
+    public void OnValueSet_FiresWhenSetValueSucceeds()
+    {
+        bool fired = false;
+        _controller.OnValueSet += () => fired = true;
+        int row = FindEmptyRow(out int col);
+        _controller.SelectCell(row, col);
+
+        _controller.SetValue(5);
+
+        Assert.IsTrue(fired);
+    }
+
+    [Test]
+    public void OnValueSet_DoesNotFireWithoutSelection()
+    {
+        bool fired = false;
+        _controller.OnValueSet += () => fired = true;
+
+        _controller.SetValue(5);
+
+        Assert.IsFalse(fired);
+    }
+
+    [Test]
     public void OnPuzzleSolved_FiresWhenBoardBecomesFullyAndCorrectlySolved()
     {
         bool fired = false;
