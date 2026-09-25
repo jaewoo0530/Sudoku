@@ -58,5 +58,47 @@ namespace Sudoku.Core
             cell.PencilMask = 0;
             _cells[row, col] = cell;
         }
+
+        public void SetCell(int row, int col, Cell cell)
+        {
+            _cells[row, col] = cell;
+        }
+
+        public bool HasConflictAt(int row, int col)
+        {
+            int value = _cells[row, col].Value;
+            if (value == 0) return false;
+
+            for (int i = 0; i < Size; i++)
+            {
+                if (i != col && _cells[row, i].Value == value) return true;
+                if (i != row && _cells[i, col].Value == value) return true;
+            }
+
+            int boxRow = (row / BoxSize) * BoxSize;
+            int boxCol = (col / BoxSize) * BoxSize;
+            for (int r = boxRow; r < boxRow + BoxSize; r++)
+            {
+                for (int c = boxCol; c < boxCol + BoxSize; c++)
+                {
+                    if ((r != row || c != col) && _cells[r, c].Value == value) return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool IsSolved()
+        {
+            for (int r = 0; r < Size; r++)
+            {
+                for (int c = 0; c < Size; c++)
+                {
+                    if (_cells[r, c].Value == 0) return false;
+                    if (HasConflictAt(r, c)) return false;
+                }
+            }
+            return true;
+        }
     }
 }
