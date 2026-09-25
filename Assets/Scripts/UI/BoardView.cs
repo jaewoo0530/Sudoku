@@ -100,7 +100,7 @@ namespace Sudoku.UI
             int boardInsertIndex = canvasTransform.childCount;
             for (int i = 0; i < canvasTransform.childCount; i++)
             {
-                if (canvasTransform.GetChild(i).GetComponent<Button>() != null)
+                if (canvasTransform.GetChild(i).GetComponentInChildren<Button>(true) != null)
                 {
                     boardInsertIndex = i;
                     break;
