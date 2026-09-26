@@ -213,7 +213,7 @@ namespace Sudoku.UI
             pickerBackground.color = new Color(0.15f, 0.15f, 0.15f, 0.95f);
 
             var grid = pickerRect.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(18, 18);
+            grid.cellSize = new Vector2(15, 15);
             grid.spacing = new Vector2(3, 3);
             grid.padding = new RectOffset(3, 3, 3, 3);
             grid.childAlignment = TextAnchor.MiddleCenter;
@@ -228,7 +228,7 @@ namespace Sudoku.UI
                 var textRect = CreateUIObject("Label", buttonRect);
                 StretchFull(textRect);
                 var text = textRect.gameObject.AddComponent<Text>();
-                ConfigureText(text, 15);
+                ConfigureText(text, 13);
                 text.text = (i + 1).ToString();
 
                 buttons[i] = buttonRect.gameObject.AddComponent<PickerButton>();

@@ -1600,7 +1600,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Sudoku.UI.BoardView
   controller: {fileID: 1298122642}
-  boardSize: 650
+  boardSize: 550
   boxSpacing: 1
   cellSpacing: 1
 --- !u!114 &1927173193
